@@ -10,25 +10,29 @@
 
 <h1>Firebaseテスト</h1>
 
-<p>名前</p>
-<input id="name" placeholder="名前">
+<h2>名前登録</h2>
 
-<p>キーワード</p>
-<input id="word" placeholder="キーワード">
+<input id="playerName" placeholder="名前">
 
-<br><br>
-
-<button id="saveBtn">
-登録
+<button id="saveNameBtn">
+名前登録
 </button>
 
-<h2>あなたの情報</h2>
-
-<p id="myInfo">
-未登録
+<p id="myName">
+あなたの名前：未登録
 </p>
 
-<h2>登録済み</h2>
+<hr>
+
+<h2>単語登録</h2>
+
+<input id="word" placeholder="単語">
+
+<button id="saveWordBtn">
+単語登録
+</button>
+
+<h2>登録済み一覧</h2>
 
 <ul id="list"></ul>
 
@@ -60,17 +64,11 @@ const db = getFirestore(app);
 const savedName =
   localStorage.getItem("playerName");
 
-const savedWord =
-  localStorage.getItem("playerWord");
+if(savedName){
 
-if(savedName && savedWord){
-
-  document.getElementById("myInfo")
-    .textContent =
-    "名前：" +
-    savedName +
-    "　キーワード：" +
-    savedWord;
+  document.getElementById("myName")
+  .textContent =
+  "あなたの名前：" + savedName;
 
 }
 
@@ -83,7 +81,7 @@ async function loadData(){
 
   const snapshot =
     await getDocs(
-      collection(db,"players")
+      collection(db,"words")
     );
 
   snapshot.forEach((doc)=>{
@@ -94,56 +92,62 @@ async function loadData(){
       document.createElement("li");
 
     li.textContent =
-      data.name +
-      " ： " +
-      data.word;
+      data.name + "：" + data.word;
 
     list.appendChild(li);
 
   });
+
 }
 
 document
-.getElementById("saveBtn")
-.addEventListener("click", async ()=>{
+.getElementById("saveNameBtn")
+.addEventListener("click", ()=>{
 
   const name =
-    document.getElementById("name").value;
+    document.getElementById("playerName").value;
 
-  const word =
-    document.getElementById("word").value;
-
-  if(!name || !word){
-    return;
-  }
-
-  await addDoc(
-    collection(db,"players"),
-    {
-      name:name,
-      word:word
-    }
-  );
+  if(!name) return;
 
   localStorage.setItem(
     "playerName",
     name
   );
 
-  localStorage.setItem(
-    "playerWord",
-    word
+  document.getElementById("myName")
+  .textContent =
+  "あなたの名前：" + name;
+
+});
+
+document
+.getElementById("saveWordBtn")
+.addEventListener("click", async ()=>{
+
+  const word =
+    document.getElementById("word").value;
+
+  const name =
+    localStorage.getItem("playerName");
+
+  if(!name){
+    alert("先に名前を登録してください");
+    return;
+  }
+
+  if(!word){
+    return;
+  }
+
+  await addDoc(
+    collection(db,"words"),
+    {
+      name:name,
+      word:word
+    }
   );
 
-  document.getElementById("myInfo")
-    .textContent =
-    "名前：" +
-    name +
-    "　キーワード：" +
-    word;
-
-  document.getElementById("name").value="";
-  document.getElementById("word").value="";
+  document.getElementById("word").value = "";
 
   loadData();
 
