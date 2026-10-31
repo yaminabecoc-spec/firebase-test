@@ -34,9 +34,9 @@ from "./common.js";
 import {
   doc,
   getDoc,
+  getDocs,
   setDoc,
-  collection,
-  getDocs
+  collection
 }
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
@@ -84,10 +84,7 @@ async function loadPlayers(){
       document.createElement("li");
 
     li.textContent =
-      String(
-        data.name ??
-        "(名前なし)"
-      );
+      data.name;
 
     list.appendChild(li);
 
@@ -96,9 +93,7 @@ async function loadPlayers(){
 }
 
 document
-.getElementById(
-  "startGame"
-)
+.getElementById("startGame")
 .addEventListener(
   "click",
   async ()=>{
@@ -126,10 +121,7 @@ document
 
     if(players.length < 3){
 
-      alert(
-        "3人以上必要です"
-      );
-
+      alert("3人以上必要です");
       return;
 
     }
@@ -184,8 +176,7 @@ document
         started:true,
         word:word,
         roles:roles,
-        createdAt:
-          Date.now()
+        createdAt:Date.now()
       }
 
     );
@@ -197,21 +188,19 @@ document
     .textContent =
       "抽選完了";
 
-    alert(
-      "抽選完了"
-    );
+  }
 
-});
+);
 
 document
-.getElementById(
-  "goGame"
-)
+.getElementById("goGame")
 .addEventListener(
+  "click",
   async ()=>{
 
     const gameRef =
       await getDoc(
+
         doc(
           db,
           "rooms",
@@ -219,11 +208,10 @@ document
           "gameData",
           "current"
         )
+
       );
 
-    if(
-      !gameRef.exists()
-    ){
+    if(!gameRef.exists()){
 
       alert(
         "まだゲーム開始されていません"
@@ -236,7 +224,9 @@ document
     window.location.href =
       "game.html";
 
-});
+  }
+
+);
 
 loadPlayers();
 
