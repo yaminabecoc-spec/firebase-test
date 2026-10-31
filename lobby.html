@@ -16,6 +16,8 @@
 
 <ul id="playerList"></ul>
 
+<p id="debug"></p>
+
 <button id="startGame">
 ゲーム開始
 </button>
@@ -24,17 +26,12 @@
 抽選
 </button>
 
-<p id="status"></p>
-
 <script type="module">
 
 import { db }
 from "./common.js";
 
 import {
-  doc,
-  getDoc,
-  setDoc,
   collection,
   getDocs
 }
@@ -43,62 +40,67 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 const roomId =
   localStorage.getItem("roomId");
 
-document.getElementById(
-  "roomInfo"
-).textContent =
-  "ルームID : " + roomId;
+document
+.getElementById("roomInfo")
+.textContent =
+"ルームID : " + roomId;
 
-async function loadPlayers(){
+try{
 
-  try{
+  const snapshot =
+    await getDocs(
 
-    const snapshot =
-      await getDocs(
-
-        collection(
-          db,
-          "rooms",
-          roomId,
-          "players"
-        )
-
-      );
-
-    const list =
-      document.getElementById(
-        "playerList"
-      );
-
-    list.innerHTML = "";
-
-    snapshot.forEach((player)=>{
-
-      const data =
-        player.data();
-
-      const li =
-        document.createElement("li");
-
-      li.textContent =
-        data.name || "(名前なし)";
-
-      list.appendChild(li);
-
-    });
-
-  }
-  catch(e){
-
-    console.error(e);
-
-    document
-      .getElementById(
-        "status"
+      collection(
+        db,
+        "rooms",
+        roomId,
+        "players"
       )
-      .textContent =
-      "参加者読込エラー";
 
-  }
+    );
+
+  document
+    .getElementById(
+      "debug"
+    )
+    .textContent =
+      "取得件数 : " +
+      snapshot.size;
+
+  const list =
+    document
+    .getElementById(
+      "playerList"
+    );
+
+  snapshot.forEach((player)=>{
+
+    const data =
+      player.data();
+
+    console.log(data);
+
+    const li =
+      document.createElement(
+        "li"
+      );
+
+    li.textContent =
+      JSON.stringify(data);
+
+    list.appendChild(li);
+
+  });
+
+}
+catch(e){
+
+  document
+    .getElementById(
+      "debug"
+    )
+    .textContent =
+      e.message;
 
 }
 
@@ -106,55 +108,13 @@ document
 .getElementById(
   "startGame"
 )
-.addEventListener(
-  "click",
-  async ()=>{
+.onclick = ()=>{
 
-    await setDoc(
+  alert(
+    "OK"
+  );
 
-      doc(
-        db,
-        "rooms",
-        roomId,
-        "gameData",
-        "current"
-      ),
-
-      {
-        started:true,
-        test:"OK",
-        createdAt:
-          Date.now()
-      }
-
-    );
-
-    document
-    .getElementById(
-      "status"
-    )
-    .textContent =
-    "抽選完了";
-
-  }
-
-);
-
-document
-.getElementById(
-  "goGame"
-)
-.addEventListener(
-  ()=>{
-
-    window.location.href =
-      "game.html";
-
-  }
-
-);
-
-loadPlayers();
+};
 
 </script>
 
