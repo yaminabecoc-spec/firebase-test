@@ -58,6 +58,13 @@ const words = [
 
 async function loadPlayers(){
 
+  const list =
+    document.getElementById(
+      "playerList"
+    );
+
+  list.innerHTML = "";
+
   const snapshot =
     await getDocs(
       collection(
@@ -68,13 +75,6 @@ async function loadPlayers(){
       )
     );
 
-  const list =
-    document.getElementById(
-      "playerList"
-    );
-
-  list.innerHTML = "";
-
   snapshot.forEach((player)=>{
 
     const data =
@@ -84,7 +84,10 @@ async function loadPlayers(){
       document.createElement("li");
 
     li.textContent =
-      data.name;
+      String(
+        data.name ??
+        "(名前なし)"
+      );
 
     list.appendChild(li);
 
