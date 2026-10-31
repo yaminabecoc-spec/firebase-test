@@ -68,26 +68,28 @@ async function loadPlayers(){
 
   const snapshot =
     await getDocs(
+
       collection(
         db,
         "rooms",
         roomId,
         "players"
       )
+
     );
 
-  snapshot.forEach((player)=>{
+    snapshot.forEach((player)=>{
 
-    const li =
-      document
-      .createElement("li");
+      const li =
+        document
+        .createElement("li");
 
-    li.textContent =
-      player.data().name;
+      li.textContent =
+        player.data().name;
 
-    list.appendChild(li);
+      list.appendChild(li);
 
-  });
+    });
 
 }
 
