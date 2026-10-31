@@ -26,6 +26,12 @@ style="display:none">
 
 </button>
 
+<button id="goGame">
+
+抽選
+
+</button>
+
 <script type="module">
 
 import { db }
@@ -34,95 +40,223 @@ from "./common.js";
 import {
   doc,
   getDoc,
+  setDoc,
   collection,
   getDocs
 }
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const roomId =
-  localStorage.getItem(
-    "roomId"
-  );
+localStorage.getItem("roomId");
 
 const playerId =
-  localStorage.getItem(
-    "playerId"
-  );
+localStorage.getItem("playerId");
+
+const words = [
+ "単語1",
+ "単語2",
+ "単語3",
+ "単語4",
+ "単語5"
+];
 
 document
 .getElementById(
-  "roomInfo"
+ "roomInfo"
 )
 .textContent =
 "ルームID : " + roomId;
 
 async function loadPlayers(){
 
-  const list =
-    document
-    .getElementById(
-      "playerList"
-    );
+ const list =
+ document.getElementById(
+  "playerList"
+ );
 
-  list.innerHTML = "";
+ list.innerHTML = "";
 
-  const snapshot =
-    await getDocs(
+ const snapshot =
+ await getDocs(
+  collection(
+   db,
+   "rooms",
+   roomId,
+   "players"
+  )
+ );
 
-      collection(
-        db,
-        "rooms",
-        roomId,
-        "players"
-      )
+ snapshot.forEach((player)=>{
 
-    );
+  const li =
+  document.createElement("li");
 
-    snapshot.forEach((player)=>{
+  li.textContent =
+  player.data().name;
 
-      const li =
-        document
-        .createElement("li");
+  list.appendChild(li);
 
-      li.textContent =
-        player.data().name;
-
-      list.appendChild(li);
-
-    });
+ });
 
 }
+
+const roomRef =
+await getDoc(
+ doc(
+  db,
+  "rooms",
+  roomId
+ )
+);
 
 const roomData =
-  await getDoc(
-    doc(
-      db,
-      "rooms",
-      roomId
-    )
-  );
+roomRef.data();
 
-if(roomData.exists()){
+if(
+ roomData.masterId
+ ===
+ playerId
+){
 
-  const room =
-    roomData.data();
-
-  if(
-    room.masterId
-    ===
-    playerId
-  ){
-
-    document
-    .getElementById(
-      "startGame"
-    )
-    .style.display =
-      "block";
-
-  }
+ document
+ .getElementById(
+  "startGame"
+ )
+ .style.display =
+ "block";
 
 }
+
+document
+.getElementById(
+ "startGame"
+)
+.addEventListener(
+ "click",
+ async ()=>{
+
+ const snapshot =
+ await getDocs(
+  collection(
+   db,
+   "rooms",
+   roomId,
+   "players"
+  )
+ );
+
+ const players = [];
+
+ snapshot.forEach((p)=>{
+
+  players.push({
+   id:p.id,
+   ...p.data()
+  });
+
+ });
+
+ if(players.length < 3){
+
+  alert(
+   "3人以上必要です"
+  );
+
+  return;
+
+ }
+
+ const shuffled =
+ [...players]
+ .sort(
+  ()=>Math.random()-0.5
+ );
+
+ const leader =
+ shuffled[0];
+
+ const spy =
+ shuffled[1];
+
+ const word =
+ words[
+  Math.floor(
+   Math.random()
+   *
+   words.length
+  )
+ ];
+
+ const roles = {};
+
+ players.forEach((p)=>{
+
+  roles[p.id] = "市民";
+
+ });
+
+ roles[leader.id] =
+ "リーダー";
+
+ roles[spy.id] =
+ "スパイ";
+
+ await setDoc(
+
+  doc(
+   db,
+   "rooms",
+   roomId,
+   "game"
+  ),
+
+  {
+   started:true,
+   word:word,
+   roles:roles
+  }
+
+ );
+
+ alert(
+  "ゲーム開始"
+ );
+
+});
+
+document
+.getElementById(
+ "goGame"
+)
+.addEventListener(
+ async ()=>{
+
+ const gameRef =
+ await getDoc(
+  doc(
+   db,
+   "rooms",
+   roomId,
+   "game"
+  )
+ );
+
+ if(
+  !gameRef.exists()
+ ){
+
+  alert(
+   "まだゲームが開始されていません"
+  );
+
+  return;
+
+ }
+
+ window.location.href =
+ "game.html";
+
+});
 
 loadPlayers();
 
