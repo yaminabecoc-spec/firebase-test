@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>マスター</title>
+</head>
+
+<body>
+
+<h1>マスターページ</h1>
+
+<button id="createRoom">
+ルーム作成
+</button>
+
+<h2 id="roomDisplay">
+未作成
+</h2>
+
+<button id="next">
+次へ
+</button>
+
+<script>
+
+document
+.getElementById("createRoom")
+.addEventListener("click",()=>{
+
+  const roomId =
+    Math.floor(
+      1000 +
+      Math.random()*9000
+    );
+
+  localStorage.setItem(
+    "roomId",
+    roomId
+  );
+
+  document
+    .getElementById(
+      "roomDisplay"
+    )
+    .textContent =
+      roomId;
+
+});
+
+document
+.getElementById("next")
+.addEventListener("click",()=>{
+
+  window.location.href =
+    "join.html";
+
+});
+
+</script>
+
+</body>
+</html>
