@@ -16,8 +16,6 @@
 
 <ul id="playerList"></ul>
 
-<p id="debug"></p>
-
 <button id="startGame">
 ゲーム開始
 </button>
@@ -26,12 +24,17 @@
 抽選
 </button>
 
+<p id="status"></p>
+
 <script type="module">
 
 import { db }
 from "./common.js";
 
 import {
+  doc,
+  getDoc,
+  setDoc,
   collection,
   getDocs
 }
@@ -45,62 +48,47 @@ document
 .textContent =
 "ルームID : " + roomId;
 
-try{
+const words = [
+  "単語1",
+  "単語2",
+  "単語3",
+  "単語4",
+  "単語5"
+];
+
+async function loadPlayers(){
 
   const snapshot =
     await getDocs(
-
       collection(
         db,
         "rooms",
         roomId,
         "players"
       )
-
     );
-
-  document
-    .getElementById(
-      "debug"
-    )
-    .textContent =
-      "取得件数 : " +
-      snapshot.size;
 
   const list =
-    document
-    .getElementById(
+    document.getElementById(
       "playerList"
     );
+
+  list.innerHTML = "";
 
   snapshot.forEach((player)=>{
 
     const data =
       player.data();
 
-    console.log(data);
-
     const li =
-      document.createElement(
-        "li"
-      );
+      document.createElement("li");
 
     li.textContent =
-      JSON.stringify(data);
+      data.name;
 
     list.appendChild(li);
 
   });
-
-}
-catch(e){
-
-  document
-    .getElementById(
-      "debug"
-    )
-    .textContent =
-      e.message;
 
 }
 
@@ -108,13 +96,146 @@ document
 .getElementById(
   "startGame"
 )
-.onclick = ()=>{
+.addEventListener(
+  "click",
+  async ()=>{
 
-  alert(
-    "OK"
-  );
+    const snapshot =
+      await getDocs(
+        collection(
+          db,
+          "rooms",
+          roomId,
+          "players"
+        )
+      );
 
-};
+    const players = [];
+
+    snapshot.forEach((p)=>{
+
+      players.push({
+        id:p.id,
+        ...p.data()
+      });
+
+    });
+
+    if(players.length < 3){
+
+      alert(
+        "3人以上必要です"
+      );
+
+      return;
+
+    }
+
+    const shuffled =
+      [...players]
+      .sort(
+        ()=>Math.random()-0.5
+      );
+
+    const leader =
+      shuffled[0];
+
+    const spy =
+      shuffled[1];
+
+    const roles = {};
+
+    players.forEach((p)=>{
+
+      roles[p.id] =
+        "市民";
+
+    });
+
+    roles[leader.id] =
+      "リーダー";
+
+    roles[spy.id] =
+      "スパイ";
+
+    const word =
+      words[
+        Math.floor(
+          Math.random()
+          *
+          words.length
+        )
+      ];
+
+    await setDoc(
+
+      doc(
+        db,
+        "rooms",
+        roomId,
+        "gameData",
+        "current"
+      ),
+
+      {
+        started:true,
+        word:word,
+        roles:roles,
+        createdAt:
+          Date.now()
+      }
+
+    );
+
+    document
+    .getElementById(
+      "status"
+    )
+    .textContent =
+      "抽選完了";
+
+    alert(
+      "抽選完了"
+    );
+
+});
+
+document
+.getElementById(
+  "goGame"
+)
+.addEventListener(
+  async ()=>{
+
+    const gameRef =
+      await getDoc(
+        doc(
+          db,
+          "rooms",
+          roomId,
+          "gameData",
+          "current"
+        )
+      );
+
+    if(
+      !gameRef.exists()
+    ){
+
+      alert(
+        "まだゲーム開始されていません"
+      );
+
+      return;
+
+    }
+
+    window.location.href =
+      "game.html";
+
+});
+
+loadPlayers();
 
 </script>
 
