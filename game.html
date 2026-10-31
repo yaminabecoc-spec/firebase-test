@@ -5,7 +5,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1">
 
-<title>ゲーム</title>
+<title>役職表示</title>
 </head>
 
 <body>
@@ -18,6 +18,87 @@ content="width=device-width, initial-scale=1">
 
 <h2 id="word">
 </h2>
+
+<script type="module">
+
+import { db }
+from "./common.js";
+
+import {
+  doc,
+  getDoc
+}
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const roomId =
+  localStorage.getItem(
+    "roomId"
+  );
+
+const playerId =
+  localStorage.getItem(
+    "playerId"
+  );
+
+const gameRef =
+await getDoc(
+
+  doc(
+    db,
+    "rooms",
+    roomId,
+    "gameData",
+    "current"
+  )
+
+);
+
+if(
+  !gameRef.exists()
+){
+
+  document
+    .getElementById(
+      "role"
+    )
+    .textContent =
+      "ゲーム未開始";
+
+}
+else{
+
+  const game =
+    gameRef.data();
+
+  const role =
+    game.roles[playerId];
+
+  document
+    .getElementById(
+      "role"
+    )
+    .textContent =
+      role;
+
+  if(
+    role === "リーダー"
+    ||
+    role === "スパイ"
+  ){
+
+    document
+      .getElementById(
+        "word"
+      )
+      .textContent =
+      "単語 : " +
+      game.word;
+
+  }
+
+}
+
+</script>
 
 </body>
 </html>
