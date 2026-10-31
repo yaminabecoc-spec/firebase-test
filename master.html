@@ -2,7 +2,10 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>マスター</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
+<title>マスターページ</title>
 </head>
 
 <body>
@@ -17,21 +20,80 @@
 未作成
 </h2>
 
-<button id="next">
-次へ
+<button id="next" disabled>
+参加ページへ
 </button>
 
-<script>
+<script type="module">
+
+import { db }
+from "./common.js";
+
+import {
+  doc,
+  setDoc,
+  getDoc
+}
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+async function createUniqueRoomId(){
+
+  while(true){
+
+    const roomId =
+      String(
+        Math.floor(
+          1000 +
+          Math.random() * 9000
+        )
+      );
+
+    const roomRef =
+      await getDoc(
+        doc(
+          db,
+          "rooms",
+          roomId
+        )
+      );
+
+    if(!roomRef.exists()){
+
+      return roomId;
+
+    }
+
+  }
+
+}
 
 document
 .getElementById("createRoom")
-.addEventListener("click",()=>{
+.addEventListener("click",
+async ()=>{
 
   const roomId =
-    Math.floor(
-      1000 +
-      Math.random()*9000
+    await createUniqueRoomId();
+
+  const playerId =
+    localStorage.getItem(
+      "playerId"
     );
+
+  await setDoc(
+    doc(
+      db,
+      "rooms",
+      roomId
+    ),
+    {
+      roomId: roomId,
+      created: true,
+      started: false,
+      masterId: playerId,
+      createdAt: Date.now()
+    }
+  );
 
   localStorage.setItem(
     "roomId",
@@ -43,7 +105,13 @@ document
       "roomDisplay"
     )
     .textContent =
-      roomId;
+    "ルームID : " + roomId;
+
+  document
+    .getElementById(
+      "next"
+    )
+    .disabled = false;
 
 });
 
