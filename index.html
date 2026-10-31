@@ -7,25 +7,84 @@
 </head>
 
 <body>
-<h1>Firebaseテスト</h1>
 
-<p>スマホ表示確認中</p>
+<h1>Firebaseテスト</h1>
 
 <input id="name" placeholder="名前を入力">
 
-<button onclick="saveName()">
-送信
+<button id="saveBtn">
+登録
 </button>
 
-<p id="result"></p>
+<h2>登録済み</h2>
 
-<script>
-function saveName() {
-  const name = document.getElementById("name").value;
+<ul id="list"></ul>
 
-  document.getElementById("result").innerText =
-    "入力された名前: " + name;
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
 }
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXG-VEW0ev4lqNtywdkMxzwWf8CEQ2M-c",
+  authDomain: "yaminabe-f4c7d.firebaseapp.com",
+  projectId: "yaminabe-f4c7d",
+  storageBucket: "yaminabe-f4c7d.firebasestorage.app",
+  messagingSenderId: "570479773819",
+  appId: "1:570479773819:web:4a4b49f453f3ba9b77fade"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function loadNames() {
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const snapshot =
+    await getDocs(collection(db, "players"));
+
+  snapshot.forEach((doc) => {
+
+    const li = document.createElement("li");
+
+    li.textContent = doc.data().name;
+
+    list.appendChild(li);
+
+  });
+}
+
+document
+.getElementById("saveBtn")
+.addEventListener("click", async () => {
+
+  const name =
+    document.getElementById("name").value;
+
+  if (!name) return;
+
+  await addDoc(
+    collection(db, "players"),
+    { name: name }
+  );
+
+  document.getElementById("name").value = "";
+
+  loadNames();
+});
+
+loadNames();
+
 </script>
 
 </body>
