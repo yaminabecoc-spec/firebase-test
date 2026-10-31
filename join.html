@@ -5,16 +5,14 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1">
 
-<title>参加ページ</title>
+<title>名前登録</title>
 </head>
 
 <body>
 
-<h1>参加ページ</h1>
+<h1>名前登録</h1>
 
-<h2 id="roomInfo">
-ルーム
-</h2>
+<h2 id="roomInfo"></h2>
 
 <input
 id="playerName"
@@ -24,19 +22,6 @@ placeholder="名前">
 登録
 </button>
 
-<h2>参加者一覧</h2>
-
-<ul id="playerList">
-</ul>
-
-<button
-id="startGame"
-style="display:none;">
-
-ゲーム開始
-
-</button>
-
 <script type="module">
 
 import { db }
@@ -44,10 +29,7 @@ from "./common.js";
 
 import {
   doc,
-  getDoc,
-  setDoc,
-  collection,
-  getDocs
+  setDoc
 }
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
@@ -68,41 +50,6 @@ document
 .textContent =
 "ルームID : " + roomId;
 
-async function loadPlayers(){
-
-  const list =
-    document
-    .getElementById(
-      "playerList"
-    );
-
-  list.innerHTML = "";
-
-  const snapshot =
-    await getDocs(
-      collection(
-        db,
-        "rooms",
-        roomId,
-        "players"
-      )
-    );
-
-  snapshot.forEach((player)=>{
-
-    const li =
-      document
-      .createElement("li");
-
-    li.textContent =
-      player.data().name;
-
-    list.appendChild(li);
-
-  });
-
-}
-
 document
 .getElementById(
   "registerBtn"
@@ -116,10 +63,17 @@ document
       .getElementById(
         "playerName"
       )
-      .value;
+      .value
+      .trim();
 
     if(!name){
+
+      alert(
+        "名前を入力してください"
+      );
+
       return;
+
     }
 
     localStorage.setItem(
@@ -144,44 +98,10 @@ document
 
     );
 
-    loadPlayers();
+    window.location.href =
+      "lobby.html";
 
 });
-
-const roomData =
-  await getDoc(
-    doc(
-      db,
-      "rooms",
-      roomId
-    )
-  );
-
-if(
-  roomData.exists()
-){
-
-  const room =
-    roomData.data();
-
-  if(
-    room.masterId
-    ===
-    playerId
-  ){
-
-    document
-    .getElementById(
-      "startGame"
-    )
-    .style.display =
-      "block";
-
-  }
-
-}
-
-loadPlayers();
 
 </script>
 
