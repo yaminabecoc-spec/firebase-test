@@ -2,45 +2,76 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ランダム単語テスト</title>
+<title>ログイン</title>
 </head>
 
 <body>
 
-<h1>ランダム単語テスト</h1>
+<h1>ゲームログイン</h1>
 
-<button id="randomBtn">
-単語を選ぶ
+<h2>マスター</h2>
+
+<input
+ id="masterPassword"
+ placeholder="パスワード">
+
+<button id="masterLogin">
+ログイン
 </button>
 
-<h2 id="result">
-まだ選ばれていません
-</h2>
+<hr>
+
+<h2>ゲスト</h2>
+
+<input
+ id="roomId"
+ placeholder="4桁ID">
+
+<button id="guestLogin">
+参加
+</button>
 
 <script>
 
-const words = [
-  "単語1",
-  "単語2",
-  "単語3",
-  "単語4",
-  "単語5"
-];
-
 document
-.getElementById("randomBtn")
-.addEventListener("click", () => {
+.getElementById("masterLogin")
+.addEventListener("click",()=>{
 
-  const index =
-    Math.floor(
-      Math.random() * words.length
+  const password =
+    document.getElementById(
+      "masterPassword"
+    ).value;
+
+  if(password==="2417"){
+
+    localStorage.setItem(
+      "isMaster",
+      "true"
     );
 
-  document
-    .getElementById("result")
-    .textContent =
-    words[index];
+    window.location.href =
+      "master.html";
+
+  }
+
+});
+
+document
+.getElementById("guestLogin")
+.addEventListener("click",()=>{
+
+  const roomId =
+    document.getElementById(
+      "roomId"
+    ).value;
+
+  localStorage.setItem(
+    "roomId",
+    roomId
+  );
+
+  window.location.href =
+    "join.html";
 
 });
 
