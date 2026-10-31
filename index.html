@@ -16,6 +16,10 @@
 登録
 </button>
 
+<h2 id="myName">
+あなたの名前：未登録
+</h2>
+
 <h2>登録済み</h2>
 
 <ul id="list"></ul>
@@ -45,19 +49,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const savedName =
+  localStorage.getItem("playerName");
+
+if (savedName) {
+
+  document.getElementById("myName")
+    .textContent =
+    "あなたの名前：" + savedName;
+
+}
+
 async function loadNames() {
 
-  const list = document.getElementById("list");
+  const list =
+    document.getElementById("list");
+
   list.innerHTML = "";
 
   const snapshot =
-    await getDocs(collection(db, "players"));
+    await getDocs(
+      collection(db, "players")
+    );
 
   snapshot.forEach((doc) => {
 
-    const li = document.createElement("li");
+    const li =
+      document.createElement("li");
 
-    li.textContent = doc.data().name;
+    li.textContent =
+      doc.data().name;
 
     list.appendChild(li);
 
@@ -78,9 +99,19 @@ document
     { name: name }
   );
 
+  localStorage.setItem(
+    "playerName",
+    name
+  );
+
+  document.getElementById("myName")
+    .textContent =
+    "あなたの名前：" + name;
+
   document.getElementById("name").value = "";
 
   loadNames();
+
 });
 
 loadNames();
