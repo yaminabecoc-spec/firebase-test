@@ -3,157 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Firebaseテスト</title>
+<title>ランダム単語テスト</title>
 </head>
 
 <body>
 
-<h1>Firebaseテスト</h1>
+<h1>ランダム単語テスト</h1>
 
-<h2>名前登録</h2>
-
-<input id="playerName" placeholder="名前">
-
-<button id="saveNameBtn">
-名前登録
+<button id="randomBtn">
+単語を選ぶ
 </button>
 
-<p id="myName">
-あなたの名前：未登録
-</p>
+<h2 id="result">
+まだ選ばれていません
+</h2>
 
-<hr>
+<script>
 
-<h2>単語登録</h2>
+const words = [
+  "単語1",
+  "単語2",
+  "単語3",
+  "単語4",
+  "単語5"
+];
 
-<input id="word" placeholder="単語">
+document
+.getElementById("randomBtn")
+.addEventListener("click", () => {
 
-<button id="saveWordBtn">
-単語登録
-</button>
-
-<h2>登録済み一覧</h2>
-
-<ul id="list"></ul>
-
-<script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs
-}
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCXG-VEW0ev4lqNtywdkMxzwWf8CEQ2M-c",
-  authDomain: "yaminabe-f4c7d.firebaseapp.com",
-  projectId: "yaminabe-f4c7d",
-  storageBucket: "yaminabe-f4c7d.firebasestorage.app",
-  messagingSenderId: "570479773819",
-  appId: "1:570479773819:web:4a4b49f453f3ba9b77fade"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const savedName =
-  localStorage.getItem("playerName");
-
-if(savedName){
-
-  document.getElementById("myName")
-  .textContent =
-  "あなたの名前：" + savedName;
-
-}
-
-async function loadData(){
-
-  const list =
-    document.getElementById("list");
-
-  list.innerHTML = "";
-
-  const snapshot =
-    await getDocs(
-      collection(db,"words")
+  const index =
+    Math.floor(
+      Math.random() * words.length
     );
 
-  snapshot.forEach((doc)=>{
-
-    const data = doc.data();
-
-    const li =
-      document.createElement("li");
-
-    li.textContent =
-      data.name + "：" + data.word;
-
-    list.appendChild(li);
-
-  });
-
-}
-
-document
-.getElementById("saveNameBtn")
-.addEventListener("click", ()=>{
-
-  const name =
-    document.getElementById("playerName").value;
-
-  if(!name) return;
-
-  localStorage.setItem(
-    "playerName",
-    name
-  );
-
-  document.getElementById("myName")
-  .textContent =
-  "あなたの名前：" + name;
+  document
+    .getElementById("result")
+    .textContent =
+    words[index];
 
 });
-
-document
-.getElementById("saveWordBtn")
-.addEventListener("click", async ()=>{
-
-  const word =
-    document.getElementById("word").value;
-
-  const name =
-    localStorage.getItem("playerName");
-
-  if(!name){
-    alert("先に名前を登録してください");
-    return;
-  }
-
-  if(!word){
-    return;
-  }
-
-  await addDoc(
-    collection(db,"words"),
-    {
-      name:name,
-      word:word
-    }
-  );
-
-  document.getElementById("word").value = "";
-
-  loadData();
-
-});
-
-loadData();
 
 </script>
 
