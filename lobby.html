@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ロビー</title>
 </head>
 
@@ -18,19 +16,15 @@ content="width=device-width, initial-scale=1">
 
 <ul id="playerList"></ul>
 
-<button
-id="startGame"
-style="display:none">
-
+<button id="startGame" style="display:none">
 ゲーム開始
-
 </button>
 
 <button id="goGame">
-
 抽選
-
 </button>
+
+<p id="status"></p>
 
 <script type="module">
 
@@ -47,220 +41,209 @@ import {
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const roomId =
-localStorage.getItem("roomId");
+  localStorage.getItem("roomId");
 
 const playerId =
-localStorage.getItem("playerId");
+  localStorage.getItem("playerId");
 
 const words = [
- "単語1",
- "単語2",
- "単語3",
- "単語4",
- "単語5"
+  "単語1",
+  "単語2",
+  "単語3",
+  "単語4",
+  "単語5"
 ];
 
-document
-.getElementById(
- "roomInfo"
-)
-.textContent =
-"ルームID : " + roomId;
+document.getElementById(
+  "roomInfo"
+).textContent =
+  "ルームID : " + roomId;
 
 async function loadPlayers(){
 
- const list =
- document.getElementById(
-  "playerList"
- );
+  const list =
+    document.getElementById(
+      "playerList"
+    );
 
- list.innerHTML = "";
+  list.innerHTML = "";
 
- const snapshot =
- await getDocs(
-  collection(
-   db,
-   "rooms",
-   roomId,
-   "players"
-  )
- );
+  const snapshot =
+    await getDocs(
+      collection(
+        db,
+        "rooms",
+        roomId,
+        "players"
+      )
+    );
 
- snapshot.forEach((player)=>{
+  snapshot.forEach((player)=>{
 
-  const li =
-  document.createElement("li");
+    const li =
+      document.createElement("li");
 
-  li.textContent =
-  player.data().name;
+    li.textContent =
+      player.data().name;
 
-  list.appendChild(li);
+    list.appendChild(li);
 
- });
+  });
 
 }
 
 const roomRef =
 await getDoc(
- doc(
-  db,
-  "rooms",
-  roomId
- )
+  doc(
+    db,
+    "rooms",
+    roomId
+  )
 );
 
 const roomData =
-roomRef.data();
+  roomRef.data();
 
 if(
- roomData.masterId
- ===
- playerId
+  roomData.masterId
+  ===
+  playerId
 ){
 
- document
- .getElementById(
-  "startGame"
- )
- .style.display =
- "block";
+  document
+    .getElementById(
+      "startGame"
+    )
+    .style.display =
+      "block";
 
 }
 
 document
 .getElementById(
- "startGame"
+  "startGame"
 )
 .addEventListener(
- "click",
- async ()=>{
+  "click",
+  async ()=>{
 
- const snapshot =
- await getDocs(
-  collection(
-   db,
-   "rooms",
-   roomId,
-   "players"
-  )
- );
+    try{
 
- const players = [];
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "rooms",
+            roomId,
+            "players"
+          )
+        );
 
- snapshot.forEach((p)=>{
+      const players = [];
 
-  players.push({
-   id:p.id,
-   ...p.data()
-  });
+      snapshot.forEach((p)=>{
 
- });
+        players.push({
+          id:p.id,
+          ...p.data()
+        });
 
- if(players.length < 3){
+      });
 
-  alert(
-   "3人以上必要です"
-  );
+      if(players.length < 3){
 
-  return;
+        alert(
+          "3人以上必要です"
+        );
 
- }
+        return;
 
- const shuffled =
- [...players]
- .sort(
-  ()=>Math.random()-0.5
- );
+      }
 
- const leader =
- shuffled[0];
+      const shuffled =
+        [...players]
+        .sort(
+          ()=>Math.random()-0.5
+        );
 
- const spy =
- shuffled[1];
+      const leader =
+        shuffled[0];
 
- const word =
- words[
-  Math.floor(
-   Math.random()
-   *
-   words.length
-  )
- ];
+      const spy =
+        shuffled[1];
 
- const roles = {};
+      const word =
+        words[
+          Math.floor(
+            Math.random() *
+            words.length
+          )
+        ];
 
- players.forEach((p)=>{
+      const roles = {};
 
-  roles[p.id] = "市民";
+      players.forEach((p)=>{
 
- });
+        roles[p.id] =
+          "市民";
 
- roles[leader.id] =
- "リーダー";
+      });
 
- roles[spy.id] =
- "スパイ";
+      roles[leader.id] =
+        "リーダー";
 
- await setDoc(
+      roles[spy.id] =
+        "スパイ";
 
-  doc(
-   db,
-   "rooms",
-   roomId,
-   "game"
-  ),
+      await setDoc(
 
-  {
-   started:true,
-   word:word,
-   roles:roles
-  }
+        doc(
+          db,
+          "rooms",
+          roomId,
+          "gameData",
+          "current"
+        ),
 
- );
+        {
+          started:true,
+          word:word,
+          roles:roles,
+          createdAt:
+            Date.now()
+        }
 
- alert(
-  "ゲーム開始"
- );
+      );
+
+      document
+        .getElementById(
+          "status"
+        )
+        .textContent =
+        "ゲーム開始済み";
+
+      alert(
+        "ゲーム開始完了"
+      );
+
+    }
+    catch(e){
+
+      alert(
+        e.message
+      );
+
+      console.error(e);
+
+    }
 
 });
 
 document
 .getElementById(
- "goGame"
+  "goGame"
 )
 .addEventListener(
- async ()=>{
+  async ()=>{
 
- const gameRef =
- await getDoc(
-  doc(
-   db,
-   "rooms",
-   roomId,
-   "game"
-  )
- );
-
- if(
-  !gameRef.exists()
- ){
-
-  alert(
-   "まだゲームが開始されていません"
-  );
-
-  return;
-
- }
-
- window.location.href =
- "game.html";
-
-});
-
-loadPlayers();
-
-</script>
-
-</body>
-</html>
+  
