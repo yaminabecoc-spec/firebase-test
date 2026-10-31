@@ -2,61 +2,186 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>参加</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1">
+
+<title>参加ページ</title>
 </head>
 
 <body>
 
-<h1>名前登録</h1>
+<h1>参加ページ</h1>
+
+<h2 id="roomInfo">
+ルーム
+</h2>
 
 <input
-  id="name"
-  placeholder="名前">
+id="playerName"
+placeholder="名前">
 
-<button id="save">
+<button id="registerBtn">
 登録
 </button>
 
-<h2 id="result">
-未登録
-</h2>
+<h2>参加者一覧</h2>
 
-<script>
+<ul id="playerList">
+</ul>
 
-const savedName =
+<button
+id="startGame"
+style="display:none;">
+
+ゲーム開始
+
+</button>
+
+<script type="module">
+
+import { db }
+from "./common.js";
+
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs
+}
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const roomId =
   localStorage.getItem(
-    "playerName"
+    "roomId"
   );
 
-if(savedName){
+const playerId =
+  localStorage.getItem(
+    "playerId"
+  );
 
-  document
-  .getElementById("result")
-  .textContent =
-  savedName;
+document
+.getElementById(
+  "roomInfo"
+)
+.textContent =
+"ルームID : " + roomId;
+
+async function loadPlayers(){
+
+  const list =
+    document
+    .getElementById(
+      "playerList"
+    );
+
+  list.innerHTML = "";
+
+  const snapshot =
+    await getDocs(
+      collection(
+        db,
+        "rooms",
+        roomId,
+        "players"
+      )
+    );
+
+  snapshot.forEach((player)=>{
+
+    const li =
+      document
+      .createElement("li");
+
+    li.textContent =
+      player.data().name;
+
+    list.appendChild(li);
+
+  });
 
 }
 
 document
-.getElementById("save")
-.addEventListener("click",()=>{
+.getElementById(
+  "registerBtn"
+)
+.addEventListener(
+  "click",
+  async ()=>{
 
-  const name =
-    document
-    .getElementById("name")
-    .value;
+    const name =
+      document
+      .getElementById(
+        "playerName"
+      )
+      .value;
 
-  localStorage.setItem(
-    "playerName",
-    name
-  );
+    if(!name){
+      return;
+    }
 
-  document
-  .getElementById("result")
-  .textContent =
-  name;
+    localStorage.setItem(
+      "playerName",
+      name
+    );
+
+    await setDoc(
+
+      doc(
+        db,
+        "rooms",
+        roomId,
+        "players",
+        playerId
+      ),
+
+      {
+        id: playerId,
+        name: name
+      }
+
+    );
+
+    loadPlayers();
 
 });
+
+const roomData =
+  await getDoc(
+    doc(
+      db,
+      "rooms",
+      roomId
+    )
+  );
+
+if(
+  roomData.exists()
+){
+
+  const room =
+    roomData.data();
+
+  if(
+    room.masterId
+    ===
+    playerId
+  ){
+
+    document
+    .getElementById(
+      "startGame"
+    )
+    .style.display =
+      "block";
+
+  }
+
+}
+
+loadPlayers();
 
 </script>
 
