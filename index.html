@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firebaseテスト</title>
+</head>
+
+<body>
+<h1>Firebaseテスト</h1>
+
+<p>スマホ表示確認中</p>
+
+<input id="name" placeholder="名前を入力">
+
+<button onclick="saveName()">
+送信
+</button>
+
+<p id="result"></p>
+
+<script>
+function saveName() {
+  const name = document.getElementById("name").value;
+
+  document.getElementById("result").innerText =
+    "入力された名前: " + name;
+}
+</script>
+
+</body>
+</html>
