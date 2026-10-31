@@ -2,12 +2,15 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
 <title>ログイン</title>
 </head>
 
 <body>
 
-<h1>ゲームログイン</h1>
+<h1>ログイン</h1>
 
 <h2>マスター</h2>
 
@@ -31,7 +34,16 @@
 参加
 </button>
 
-<script>
+<script type="module">
+
+import { db }
+from "./common.js";
+
+import {
+  doc,
+  getDoc
+}
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 document
 .getElementById("masterLogin")
@@ -42,7 +54,7 @@ document
       "masterPassword"
     ).value;
 
-  if(password==="2417"){
+  if(password === "2417"){
 
     localStorage.setItem(
       "isMaster",
@@ -58,20 +70,54 @@ document
 
 document
 .getElementById("guestLogin")
-.addEventListener("click",()=>{
+.addEventListener("click",
+async ()=>{
 
   const roomId =
-    document.getElementById(
+    document
+    .getElementById(
       "roomId"
-    ).value;
+    )
+    .value
+    .trim();
 
-  localStorage.setItem(
-    "roomId",
-    roomId
-  );
+  if(roomId === ""){
 
-  window.location.href =
-    "join.html";
+    alert(
+      "ルームIDを入力してください"
+    );
+
+    return;
+
+  }
+
+  const roomRef =
+    await getDoc(
+      doc(
+        db,
+        "rooms",
+        roomId
+      )
+    );
+
+  if(roomRef.exists()){
+
+    localStorage.setItem(
+      "roomId",
+      roomId
+    );
+
+    window.location.href =
+      "join.html";
+
+  }
+  else{
+
+    alert(
+      "そのルームは存在しません"
+    );
+
+  }
 
 });
 
