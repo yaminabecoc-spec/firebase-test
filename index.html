@@ -10,15 +10,23 @@
 
 <h1>Firebaseテスト</h1>
 
-<input id="name" placeholder="名前を入力">
+<p>名前</p>
+<input id="name" placeholder="名前">
+
+<p>キーワード</p>
+<input id="word" placeholder="キーワード">
+
+<br><br>
 
 <button id="saveBtn">
 登録
 </button>
 
-<h2 id="myName">
-あなたの名前：未登録
-</h2>
+<h2>あなたの情報</h2>
+
+<p id="myInfo">
+未登録
+</p>
 
 <h2>登録済み</h2>
 
@@ -52,15 +60,21 @@ const db = getFirestore(app);
 const savedName =
   localStorage.getItem("playerName");
 
-if (savedName) {
+const savedWord =
+  localStorage.getItem("playerWord");
 
-  document.getElementById("myName")
+if(savedName && savedWord){
+
+  document.getElementById("myInfo")
     .textContent =
-    "あなたの名前：" + savedName;
+    "名前：" +
+    savedName +
+    "　キーワード：" +
+    savedWord;
 
 }
 
-async function loadNames() {
+async function loadData(){
 
   const list =
     document.getElementById("list");
@@ -69,16 +83,20 @@ async function loadNames() {
 
   const snapshot =
     await getDocs(
-      collection(db, "players")
+      collection(db,"players")
     );
 
-  snapshot.forEach((doc) => {
+  snapshot.forEach((doc)=>{
+
+    const data = doc.data();
 
     const li =
       document.createElement("li");
 
     li.textContent =
-      doc.data().name;
+      data.name +
+      " ： " +
+      data.word;
 
     list.appendChild(li);
 
@@ -87,16 +105,24 @@ async function loadNames() {
 
 document
 .getElementById("saveBtn")
-.addEventListener("click", async () => {
+.addEventListener("click", async ()=>{
 
   const name =
     document.getElementById("name").value;
 
-  if (!name) return;
+  const word =
+    document.getElementById("word").value;
+
+  if(!name || !word){
+    return;
+  }
 
   await addDoc(
-    collection(db, "players"),
-    { name: name }
+    collection(db,"players"),
+    {
+      name:name,
+      word:word
+    }
   );
 
   localStorage.setItem(
@@ -104,17 +130,26 @@ document
     name
   );
 
-  document.getElementById("myName")
+  localStorage.setItem(
+    "playerWord",
+    word
+  );
+
+  document.getElementById("myInfo")
     .textContent =
-    "あなたの名前：" + name;
+    "名前：" +
+    name +
+    "　キーワード：" +
+    word;
 
-  document.getElementById("name").value = "";
+  document.getElementById("name").value="";
+  document.getElementById("word").value="";
 
-  loadNames();
+  loadData();
 
 });
 
-loadNames();
+loadData();
 
 </script>
 
