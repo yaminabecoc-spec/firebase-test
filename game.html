@@ -5,7 +5,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1">
 
-<title>役職表示</title>
+<title>結果表示</title>
 </head>
 
 <body>
@@ -16,8 +16,7 @@ content="width=device-width, initial-scale=1">
 読み込み中
 </h2>
 
-<h2 id="word">
-</h2>
+<h2 id="word"></h2>
 
 <script type="module">
 
@@ -58,11 +57,11 @@ if(
 ){
 
   document
-    .getElementById(
-      "role"
-    )
-    .textContent =
-      "ゲーム未開始";
+  .getElementById(
+    "role"
+  )
+  .textContent =
+  "ゲーム未開始";
 
 }
 else{
@@ -74,11 +73,11 @@ else{
     game.roles[playerId];
 
   document
-    .getElementById(
-      "role"
-    )
-    .textContent =
-      role;
+  .getElementById(
+    "role"
+  )
+  .textContent =
+  role;
 
   if(
     role === "リーダー"
@@ -87,12 +86,22 @@ else{
   ){
 
     document
-      .getElementById(
-        "word"
-      )
-      .textContent =
-      "単語 : " +
-      game.word;
+    .getElementById(
+      "word"
+    )
+    .textContent =
+    "単語 : "
+    + game.word;
+
+  }
+  else{
+
+    document
+    .getElementById(
+      "word"
+    )
+    .textContent =
+    "単語は表示されません";
 
   }
 
