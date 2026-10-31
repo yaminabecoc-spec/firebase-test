@@ -21,6 +21,10 @@ content="width=device-width, initial-scale=1">
 ゲーム開始
 </button>
 
+<button id="goGame">
+抽選
+</button>
+
 <p id="status"></p>
 
 <script type="module">
@@ -30,6 +34,7 @@ from "./common.js";
 
 import {
   doc,
+  getDoc,
   setDoc,
   collection,
   getDocs
@@ -37,16 +42,20 @@ import {
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const roomId =
-  localStorage.getItem(
-    "roomId"
-  );
+  localStorage.getItem("roomId");
 
 document
-.getElementById(
-  "roomInfo"
-)
+.getElementById("roomInfo")
 .textContent =
 "ルームID : " + roomId;
+
+const words = [
+  "単語1",
+  "単語2",
+  "単語3",
+  "単語4",
+  "単語5"
+];
 
 async function loadPlayers(){
 
@@ -89,46 +98,138 @@ document
   "click",
   async ()=>{
 
-    try{
+    const snapshot =
+      await getDocs(
+        collection(
+          db,
+          "rooms",
+          roomId,
+          "players"
+        )
+      );
 
-      await setDoc(
+    const players = [];
 
+    snapshot.forEach((p)=>{
+
+      players.push({
+        id:p.id,
+        ...p.data()
+      });
+
+    });
+
+    if(players.length < 3){
+
+      alert(
+        "3人以上必要です"
+      );
+
+      return;
+
+    }
+
+    const shuffled =
+      [...players]
+      .sort(
+        ()=>Math.random()-0.5
+      );
+
+    const leader =
+      shuffled[0];
+
+    const spy =
+      shuffled[1];
+
+    const roles = {};
+
+    players.forEach((p)=>{
+
+      roles[p.id] =
+        "市民";
+
+    });
+
+    roles[leader.id] =
+      "リーダー";
+
+    roles[spy.id] =
+      "スパイ";
+
+    const word =
+      words[
+        Math.floor(
+          Math.random()
+          *
+          words.length
+        )
+      ];
+
+    await setDoc(
+
+      doc(
+        db,
+        "rooms",
+        roomId,
+        "gameData",
+        "current"
+      ),
+
+      {
+        started:true,
+        word:word,
+        roles:roles,
+        createdAt:
+          Date.now()
+      }
+
+    );
+
+    document
+    .getElementById(
+      "status"
+    )
+    .textContent =
+    "抽選完了";
+
+    alert(
+      "抽選完了"
+    );
+
+});
+
+document
+.getElementById(
+  "goGame"
+)
+.addEventListener(
+  async ()=>{
+
+    const gameRef =
+      await getDoc(
         doc(
           db,
           "rooms",
           roomId,
           "gameData",
           "current"
-        ),
-
-        {
-          started:true,
-          test:"OK",
-          createdAt:
-            Date.now()
-        }
-
+        )
       );
 
-      document
-      .getElementById(
-        "status"
-      )
-      .textContent =
-      "保存成功";
+    if(
+      !gameRef.exists()
+    ){
 
       alert(
-        "Firestore保存成功"
+        "まだゲーム開始されていません"
       );
 
-    }
-    catch(e){
-
-      alert(
-        e.message
-      );
+      return;
 
     }
+
+    window.location.href =
+      "game.html";
 
 });
 
