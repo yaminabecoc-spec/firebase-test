@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>参加</title>
+</head>
+
+<body>
+
+<h1>名前登録</h1>
+
+<input
+  id="name"
+  placeholder="名前">
+
+<button id="save">
+登録
+</button>
+
+<h2 id="result">
+未登録
+</h2>
+
+<script>
+
+const savedName =
+  localStorage.getItem(
+    "playerName"
+  );
+
+if(savedName){
+
+  document
+  .getElementById("result")
+  .textContent =
+  savedName;
+
+}
+
+document
+.getElementById("save")
+.addEventListener("click",()=>{
+
+  const name =
+    document
+    .getElementById("name")
+    .value;
+
+  localStorage.setItem(
+    "playerName",
+    name
+  );
+
+  document
+  .getElementById("result")
+  .textContent =
+  name;
+
+});
+
+</script>
+
+</body>
+</html>
