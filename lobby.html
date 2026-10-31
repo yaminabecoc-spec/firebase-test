@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ロビー</title>
 </head>
 
@@ -44,49 +43,62 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 const roomId =
   localStorage.getItem("roomId");
 
-document
-.getElementById("roomInfo")
-.textContent =
-"ルームID : " + roomId;
-
-const words = [
-  "単語1",
-  "単語2",
-  "単語3",
-  "単語4",
-  "単語5"
-];
+document.getElementById(
+  "roomInfo"
+).textContent =
+  "ルームID : " + roomId;
 
 async function loadPlayers(){
 
-  const list =
-    document.getElementById(
-      "playerList"
-    );
+  try{
 
-  list.innerHTML = "";
+    const snapshot =
+      await getDocs(
 
-  const snapshot =
-    await getDocs(
-      collection(
-        db,
-        "rooms",
-        roomId,
-        "players"
+        collection(
+          db,
+          "rooms",
+          roomId,
+          "players"
+        )
+
+      );
+
+    const list =
+      document.getElementById(
+        "playerList"
+      );
+
+    list.innerHTML = "";
+
+    snapshot.forEach((player)=>{
+
+      const data =
+        player.data();
+
+      const li =
+        document.createElement("li");
+
+      li.textContent =
+        data.name || "(名前なし)";
+
+      list.appendChild(li);
+
+    });
+
+  }
+  catch(e){
+
+    console.error(e);
+
+    document
+      .getElementById(
+        "status"
       )
-    );
+      .textContent =
+      "参加者読込エラー";
 
-  snapshot.forEach((player)=>{
-
-    const li =
-      document.createElement("li");
-
-    li.textContent =
-      player.data().name;
-
-    list.appendChild(li);
-
-  });
+  }
 
 }
 
@@ -97,73 +109,6 @@ document
 .addEventListener(
   "click",
   async ()=>{
-
-    const snapshot =
-      await getDocs(
-        collection(
-          db,
-          "rooms",
-          roomId,
-          "players"
-        )
-      );
-
-    const players = [];
-
-    snapshot.forEach((p)=>{
-
-      players.push({
-        id:p.id,
-        ...p.data()
-      });
-
-    });
-
-    if(players.length < 3){
-
-      alert(
-        "3人以上必要です"
-      );
-
-      return;
-
-    }
-
-    const shuffled =
-      [...players]
-      .sort(
-        ()=>Math.random()-0.5
-      );
-
-    const leader =
-      shuffled[0];
-
-    const spy =
-      shuffled[1];
-
-    const roles = {};
-
-    players.forEach((p)=>{
-
-      roles[p.id] =
-        "市民";
-
-    });
-
-    roles[leader.id] =
-      "リーダー";
-
-    roles[spy.id] =
-      "スパイ";
-
-    const word =
-      words[
-        Math.floor(
-          Math.random()
-          *
-          words.length
-        )
-      ];
 
     await setDoc(
 
@@ -177,8 +122,7 @@ document
 
       {
         started:true,
-        word:word,
-        roles:roles,
+        test:"OK",
         createdAt:
           Date.now()
       }
@@ -192,46 +136,23 @@ document
     .textContent =
     "抽選完了";
 
-    alert(
-      "抽選完了"
-    );
+  }
 
-});
+);
 
 document
 .getElementById(
   "goGame"
 )
 .addEventListener(
-  async ()=>{
-
-    const gameRef =
-      await getDoc(
-        doc(
-          db,
-          "rooms",
-          roomId,
-          "gameData",
-          "current"
-        )
-      );
-
-    if(
-      !gameRef.exists()
-    ){
-
-      alert(
-        "まだゲーム開始されていません"
-      );
-
-      return;
-
-    }
+  ()=>{
 
     window.location.href =
       "game.html";
 
-});
+  }
+
+);
 
 loadPlayers();
 
